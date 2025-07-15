@@ -1,0 +1,36 @@
+services:
+  redis-celery: # Our project's Redis service
+    image: "redis:alpine"
+    ports:
+      - "6379:6379" # Standard Redis port for host access
+    volumes:
+      - celery_redis_data:/data # Persist Redis data
+    restart: unless-stopped
+
+  web-celery-reflex: # Our Reflex application
+    build: . # Build from local Dockerfile
+    command: web # Passed to entrypoint.sh
+    ports:
+      - "3000:3000" # Reflex app runs on port 3000
+      - "8000:8000" # Reflex app runs on port 8000
+    volumes:
+      - .:/app # Mount current directory for live reload
+    env_file:
+      - .env # For SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY, REDIS_URL etc.
+    depends_on:
+      redis-celery:
+        condition: service_started
+
+  worker-celery: # Our Celery worker
+    build: . # Build from local Dockerfile
+    command: worker # Passed to entrypoint.sh
+    volumes:
+      - .:/app # Mount current directory
+    env_file:
+      - .env # For SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY, REDIS_URL etc.
+    depends_on:
+      redis-celery:
+        condition: service_started
+
+volumes:
+  celery_redis_data: # From our project's original docker-compose.yml
