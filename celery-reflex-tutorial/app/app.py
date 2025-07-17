@@ -3,7 +3,7 @@
 import reflex as rx
 
 from rxconfig import config
-
+from app.states.status import TaskStatusState
 
 class State(rx.State):
     """The app state."""
@@ -14,16 +14,12 @@ def index() -> rx.Component:
     return rx.container(
         rx.color_mode.button(position="top-right"),
         rx.vstack(
-            rx.heading("Welcome to Reflex!", size="9"),
-            rx.text(
-                "Get started by editing ",
-                rx.code(f"{config.app_name}/{config.app_name}.py"),
-                size="5",
-            ),
-            rx.link(
-                rx.button("Check out our docs!"),
-                href="https://reflex.dev/docs/getting-started/introduction/",
-                is_external=True,
+            rx.heading("Tasks with Celery and Reflex!", size="9"),
+            rx.button(
+                "Run Demo Task",
+                on_click=TaskStatusState.run_simple_demo_task,
+                color_scheme="teal",
+                size="3",
             ),
             spacing="5",
             justify="center",
