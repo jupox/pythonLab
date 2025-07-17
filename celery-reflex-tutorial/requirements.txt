@@ -5,3 +5,5 @@ openai>=1.0.0
 python-dotenv
 reflex
 requests
+reflex
+reflex==0.8.2
