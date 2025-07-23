@@ -1,1 +1,1 @@
-from .simple_task import simple_demo_task
+from .simple_task import simple_task

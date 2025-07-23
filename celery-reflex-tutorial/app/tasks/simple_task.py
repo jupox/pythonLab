@@ -19,8 +19,8 @@ else:
     print("Warning: OPENAI_API_KEY not found. AI features will be limited.")
 
 @celery_app.task
-def simple_demo_task():
+def simple_task():
     """A simple Celery task that simulates work."""
-    time.sleep(5)
+    time.sleep(15)
 
     return "done"

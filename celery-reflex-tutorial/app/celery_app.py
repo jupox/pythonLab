@@ -21,3 +21,4 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
 )
+__all__ = ["celery_app"]

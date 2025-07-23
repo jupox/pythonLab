@@ -3,11 +3,81 @@
 import reflex as rx
 
 from rxconfig import config
-from app.states.status import TaskStatusState
+from app.states.task_status import TaskStatus, TaskStatusState
 
 class State(rx.State):
     """The app state."""
 
+def task_table() -> rx.Component:
+    """Table to display all tasks with actions."""
+    return rx.box(
+        rx.heading("Task Table", size="5", margin_bottom="1em"),
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    rx.table.column_header_cell("Job ID"),
+                    rx.table.column_header_cell("Message"),
+                    rx.table.column_header_cell("Type"),
+                    rx.table.column_header_cell("Status"),
+                    rx.table.column_header_cell("Created At"),
+                    rx.table.column_header_cell("Updated At"),
+                    rx.table.column_header_cell("Actions"),
+                )
+            ),
+            rx.table.body(
+                rx.foreach(
+                    TaskStatusState.task_statuses,
+                    lambda task: rx.table.row(
+                        rx.table.cell(task.id),
+                        rx.table.cell(task.message),
+                        rx.table.cell(task.type_task),
+                        rx.table.cell(task.status),
+                        rx.table.cell(task.created_at),
+                        rx.table.cell(task.updated_at),
+                        rx.table.cell(
+                            rx.hstack(
+                                rx.cond((task.status == TaskStatus.REVOKED) | (task.status == TaskStatus.SUCCESS), 
+                                    rx.button(
+                                        rx.icon("play", size=18),
+                                        size="1",
+                                        on_click=TaskStatusState.run_again_task(task.id),
+                                    ),
+                                    rx.fragment(),
+                                ),
+                                rx.cond((task.status == TaskStatus.RUNNING) | (task.status == TaskStatus.PENDING) | (task.status == TaskStatus), 
+                                    rx.button(
+                                        rx.icon("square", size=18),
+                                        size="1",
+                                        on_click=TaskStatusState.stop_task(task.id),
+                                    ),
+                                    rx.fragment(),
+                                ),
+                                rx.cond((task.status != TaskStatus.ARCHIVED),
+                                    rx.button(
+                                        rx.icon("refresh_ccw", size=18),
+                                        size="1",
+                                        on_click=TaskStatusState.refresh_task_status(task.id),
+                                    ),
+                                    rx.fragment(),
+                                ),
+                                rx.cond((task.status == TaskStatus.SUCCESS) | (task.status == TaskStatus.STOPPED), 
+                                    rx.button(
+                                        rx.icon("archive", size=18),
+                                        color_scheme="red",
+                                        size="1",
+                                        on_click=TaskStatusState.set_task_archived(task.id),
+                                    ),
+                                    rx.fragment(),
+                                ),
+                                spacing="2",
+                            )
+                        ),
+                    ),
+                )
+            ),
+        ),
+        margin_bottom="2em",
+    )
 
 def index() -> rx.Component:
     # Welcome Page (Index)
@@ -15,15 +85,18 @@ def index() -> rx.Component:
         rx.color_mode.button(position="top-right"),
         rx.vstack(
             rx.heading("Tasks with Celery and Reflex!", size="9"),
-            rx.button(
-                "Run Demo Task",
-                on_click=TaskStatusState.run_simple_demo_task,
-                color_scheme="teal",
-                size="3",
+            rx.hstack(
+                rx.button(
+                    "Run Simple Task",
+                    on_click=TaskStatusState.run_simple_task,
+                    color_scheme="teal",
+                    size="3",
+                ),
             ),
+            task_table(),
             spacing="5",
             justify="center",
-            min_height="85vh",
+            min_height="95vh",
         ),
     )
 
