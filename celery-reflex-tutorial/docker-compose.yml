@@ -7,6 +7,16 @@ services:
       - celery_redis_data:/data # Persist Redis data
     restart: unless-stopped
 
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081" # Redis Commander UI on port 8081
+    environment:
+      - REDIS_HOST=redis-celery # Connect to our Redis service
+    depends_on:
+      - redis-celery
+    restart: unless-stopped
+
   web-celery-reflex: # Our Reflex application
     build: . # Build from local Dockerfile
     command: web # Passed to entrypoint.sh
