@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 
-REDIS_URL_FROM_ENV = os.getenv("REDIS_", "redis://redis:6379/0")
+REDIS_URL_FROM_ENV = os.getenv("REDIS_", "redis://localhost:6379/0")
 print(f"Using Redis URL: {REDIS_URL_FROM_ENV}")
 
 celery_app = Celery(

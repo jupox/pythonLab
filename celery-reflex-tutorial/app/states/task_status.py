@@ -1,4 +1,4 @@
-from app.tasks.simple_task import simple_task
+from app.tasks.simple_task import create_random_instructions_file, purge_data, simple_task
 from app.models import TaskItem
 import reflex as rx
 from datetime import datetime
@@ -6,6 +6,7 @@ import uuid
 from app.celery_app import celery_app  # Import the Celery app instance
 from celery.result import AsyncResult
 from enum import Enum
+import random
 
 class TaskStatus(Enum):
     RUNNING = "RUNNING"
@@ -68,6 +69,11 @@ class TaskStatusState(rx.State):
                     task.status = TaskStatus.RUNNING_AGAIN
                     task.message = "Task is running again."
                     task.updated_at = datetime.now()
+                elif task.type_task == "File_Task":
+                    create_random_instructions_file.apply_async(task_id=task.id)
+                    task.status = TaskStatus.RUNNING_AGAIN
+                    task.message = "File Task is running again."
+                    task.updated_at = datetime.now()
                 yield rx.toast.success(f"Task {task_id} is running again!", duration=2000)
                 return
         yield rx.toast.error("Task not found!", duration=2000)
@@ -88,15 +94,24 @@ class TaskStatusState(rx.State):
     @rx.event
     def refresh_task_status(self, task_id: str):
         """Refresh the status of a task by its ID."""
-        for task in self.task_statuses:
+        result = AsyncResult(task_id)
+
+        if "purge" in (str(result.result) if result.result else ""):
+            for task in self.task_statuses:
+                if task_id != task.id:
+                    AsyncResult(task.id).forget()  # Clear other tasks
+            self.task_statuses = [task for task in self.task_statuses if task.id == task_id]
+            yield rx.toast.info(f"List of tasks purged!", duration=2000)
+            
+        for task in self.task_statuses:            
             if task.id == task_id:
-                result = AsyncResult(task_id)
                 if result.status != task.status:
                     task.status = result.status
                     task.message = str(result.result) if result.result else "No result yet."
-                    task.updated_at = datetime.now()
+                    task.updated_at = datetime.now()                    
                     yield rx.toast.info(f"Task {task_id} status refreshed!", duration=2000)
                 return
+                    
         yield rx.toast.error("Task not found!", duration=2000)
 
     @rx.event
@@ -117,3 +132,21 @@ class TaskStatusState(rx.State):
                 return
         yield rx.toast.error("Task not found!", duration=2000)
 
+
+    @rx.event
+    def run_generate_instructions_task(self):
+        num_lines = random.randint(1, 1000000)
+        result = create_random_instructions_file.delay(num_lines)
+        aux_id = str(uuid.uuid4())         
+        task_id = result.id or aux_id
+        self.set_task_status(task_id, TaskStatus.RUNNING, f"File_Task with {num_lines} lines", "generate")
+        yield rx.toast.success("File Task is running!", duration=2000)
+
+    @rx.event
+    def run_purge_data(self):
+        """Purge the data.txt file and clear the task queue."""
+        result = purge_data.delay()
+        aux_id = str(uuid.uuid4())         
+        task_id = result.id or aux_id
+        self.set_task_status(task_id, TaskStatus.RUNNING, "Purging redis and data.txt", "purge")
+        yield rx.toast.success("Purging data.txt is running!", duration=2000)

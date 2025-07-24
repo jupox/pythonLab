@@ -36,7 +36,7 @@ def task_table() -> rx.Component:
                         rx.table.cell(task.updated_at),
                         rx.table.cell(
                             rx.hstack(
-                                rx.cond((task.status == TaskStatus.REVOKED) | (task.status == TaskStatus.SUCCESS), 
+                                rx.cond((task.type_task != "purge") & ((task.status == TaskStatus.REVOKED) | (task.status == TaskStatus.SUCCESS)), 
                                     rx.button(
                                         rx.icon("play", size=18),
                                         size="1",
@@ -44,7 +44,7 @@ def task_table() -> rx.Component:
                                     ),
                                     rx.fragment(),
                                 ),
-                                rx.cond((task.status == TaskStatus.RUNNING) | (task.status == TaskStatus.PENDING) | (task.status == TaskStatus), 
+                                rx.cond((task.type_task != "purge") & ((task.status == TaskStatus.RUNNING) | (task.status == TaskStatus.PENDING) | (task.status == TaskStatus)), 
                                     rx.button(
                                         rx.icon("square", size=18),
                                         size="1",
@@ -52,7 +52,7 @@ def task_table() -> rx.Component:
                                     ),
                                     rx.fragment(),
                                 ),
-                                rx.cond((task.status != TaskStatus.ARCHIVED),
+                                rx.cond(task.status != TaskStatus.SUCCESS & ( task.status != TaskStatus.ARCHIVED),
                                     rx.button(
                                         rx.icon("refresh_ccw", size=18),
                                         size="1",
@@ -87,8 +87,20 @@ def index() -> rx.Component:
             rx.heading("Tasks with Celery and Reflex!", size="9"),
             rx.hstack(
                 rx.button(
+                    "Clear All Statuses",
+                    on_click=TaskStatusState.run_purge_data,
+                    color_scheme="red",
+                    size="3",
+                ),
+                rx.button(
                     "Run Simple Task",
                     on_click=TaskStatusState.run_simple_task,
+                    color_scheme="teal",
+                    size="3",
+                ),
+                rx.button(
+                    "Generate Instructions Task",
+                    on_click=TaskStatusState.run_generate_instructions_task,
                     color_scheme="teal",
                     size="3",
                 ),
