@@ -21,6 +21,6 @@ else:
 @celery_app.task
 def simple_task():
     """A simple Celery task that simulates work."""
-    time.sleep(15)
+    time.sleep(5)
 
     return "done"
