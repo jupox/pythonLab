@@ -49,18 +49,12 @@ class TaskStatusState(rx.State):
         """Clear all task statuses."""
         self.task_statuses = []
 
-    # status 
-    # 1. running
-    # 2. running again
-    # 3. archived
-
     @rx.event
     def run_simple_task(self):
         """Trigger the Celery simple_demo_task and show toasts."""
         result = simple_task.delay()
         aux_id = str(uuid.uuid4())         
         task_id = result.id or aux_id
-        print(result.id, aux_id, result.task_id, task_id)
         self.set_task_status(task_id, TaskStatus.RUNNING, "Simple Task")
         yield rx.toast.success("Simple Task is running!", duration=2000)
 
@@ -97,7 +91,6 @@ class TaskStatusState(rx.State):
         for task in self.task_statuses:
             if task.id == task_id:
                 result = AsyncResult(task_id)
-                print(result.id, result.status, result.state, task.status)
                 if result.status != task.status:
                     task.status = result.status
                     task.message = str(result.result) if result.result else "No result yet."
