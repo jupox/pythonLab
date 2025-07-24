@@ -6,7 +6,7 @@ import os
 
 # It's better to read from rxconfig if possible, but for worker context,
 # environment variables are robust.
-REDIS_URL_FROM_ENV = os.getenv("REDIS_", "redis://redis:6379/0")
+REDIS_URL_FROM_ENV = os.getenv("REDIS_", "redis://redis-celery:6379/0")
 print(f"Using Redis URL: {REDIS_URL_FROM_ENV}")
 
 celery_app = Celery(
