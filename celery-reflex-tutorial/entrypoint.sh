@@ -29,7 +29,7 @@ case "$1" in
             export PATH="$PATH:/home/swebot/.local/bin"
         fi
         
-        exec celery -A app.celery_app worker -l info
+        exec celery -A app.celery_app worker -B -l info
         ;;
     *)
         # If no argument or an unknown argument is given, execute the passed command.

@@ -14,12 +14,6 @@ import time
 import random
 import string
 
-OPENAI_API_KEY_FROM_ENV = os.getenv("OPENAI_API_KEY") 
-if OPENAI_API_KEY_FROM_ENV:
-    client = OpenAI(api_key=OPENAI_API_KEY_FROM_ENV)
-else:
-    print("Warning: OPENAI_API_KEY not found. AI features will be limited.")
-
 @celery_app.task
 def simple_task():
     """A simple Celery task that simulates work."""

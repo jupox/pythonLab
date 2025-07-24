@@ -20,5 +20,11 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    beat_schedule={
+        'scheduler-dispatcher-task-validate_instructions': {
+            'task': 'app.tasks.scheduler_task.validate_instructions',
+            'schedule': timedelta(seconds=10),
+        },
+    }
 )
 __all__ = ["celery_app"]

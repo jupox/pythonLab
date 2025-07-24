@@ -4,6 +4,7 @@ import reflex as rx
 
 from rxconfig import config
 from app.states.task_status import TaskStatus, TaskStatusState
+from app.pages.scheduler import scheduler_page
 
 class State(rx.State):
     """The app state."""
@@ -11,7 +12,7 @@ class State(rx.State):
 def task_table() -> rx.Component:
     """Table to display all tasks with actions."""
     return rx.box(
-        rx.heading("Task Table", size="5", margin_bottom="1em"),
+        rx.heading("Task Table", size="5", margin_y="2em"),
         rx.table.root(
             rx.table.header(
                 rx.table.row(
@@ -76,6 +77,7 @@ def task_table() -> rx.Component:
                 )
             ),
         ),
+        width="100%",
         margin_bottom="2em",
     )
 
@@ -90,28 +92,38 @@ def index() -> rx.Component:
                     "Clear All Statuses",
                     on_click=TaskStatusState.run_purge_data,
                     color_scheme="red",
-                    size="3",
+                    size="2",
                 ),
                 rx.button(
                     "Run Simple Task",
                     on_click=TaskStatusState.run_simple_task,
                     color_scheme="teal",
-                    size="3",
+                    size="2",
                 ),
                 rx.button(
                     "Generate Instructions Task",
                     on_click=TaskStatusState.run_generate_instructions_task,
                     color_scheme="teal",
-                    size="3",
+                    size="2",
+                ),
+                rx.button(
+                    "Scheduler Codes",
+                    on_click=rx.redirect(
+                        "/scheduler"
+                    ),
+                    size="2",
                 ),
             ),
             task_table(),
-            spacing="5",
-            justify="center",
-            min_height="95vh",
+            padding="2em",
+            max_width="1000px",
+            margin="auto",
         ),
+        max_width="1000px",
+        margin="auto",
     )
 
 
 app = rx.App()
 app.add_page(index)
+app.add_page(scheduler_page)

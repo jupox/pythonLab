@@ -1,6 +1,7 @@
 from app.tasks.simple_task import create_random_instructions_file, purge_data, simple_task
 from app.models import TaskItem
 import reflex as rx
+from app.utils import get_supabase_client # Import the helper
 from datetime import datetime
 import uuid
 from app.celery_app import celery_app  # Import the Celery app instance
@@ -149,4 +150,15 @@ class TaskStatusState(rx.State):
         aux_id = str(uuid.uuid4())         
         task_id = result.id or aux_id
         self.set_task_status(task_id, TaskStatus.RUNNING, "Purging redis and data.txt", "purge")
+
+        supabase = get_supabase_client()
+        # Clear the Supabase table TaskItems
+        yield rx.toast.success("Clearing Supabase table TaskItems!", duration=2000)
+        # Clear the Supabase table TaskItems
+        response = supabase.table('codes').delete().neq("id", 0).execute()
+        if not response:
+            yield rx.toast.error("Failed to clear Supabase table!", duration=2000)
+        else:
+            yield rx.toast.success("Supabase Code table cleared successfully!", duration=2000)
+
         yield rx.toast.success("Purging data.txt is running!", duration=2000)
