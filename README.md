@@ -1,5 +1,6 @@
 
-# Celery Redis Reflex - Docker - Python
+# celery-reflex-tutorial: Celery Redis Reflex - Docker - Python
+
 **Running the Application with Docker Compose:**
 
 1.  **Ensure No Port Conflicts**:
@@ -16,4 +17,4 @@
     This command will:
     *   Pull official images for Supabase services and Redis if you don't have them locally.
     *   Build the Docker image for your application.
-    *   Start all defined services, including the full Supabase stack and your application's `web`, `worker`, and `redis` services.
+    *   Start all defined services, including the full Supabase stack and your application's `web-celery-reflex`, `worker-celery`, and `redis-celery` services.
